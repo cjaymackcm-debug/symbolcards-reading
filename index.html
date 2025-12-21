@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Symbol Cards by Colin McAllister</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: linear-gradient(to bottom, #e0f7fa, #b2ebf2); color: #333; text-align: center; padding: 20px; }
+        h1 { color: #006064; }
+        .buttons { margin: 40px; }
+        button { padding: 15px 30px; margin: 10px; font-size: 18px; background: #00bcd4; color: white; border: none; border-radius: 10px; cursor: pointer; }
+        button:hover { background: #0097a7; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        #ownerBtn { background: #8e24aa; }
+        #ownerBtn:hover { background: #6a1b9a; }
+        .card-container { margin: 40px auto; max-width: 95%; display: flex; flex-wrap: wrap; justify-content: center; gap: 30px; }
+        .card-wrapper { perspective: 1000px; }
+        .card { width: 350px; height: 500px; position: relative; transform-style: preserve-3d; transition: transform 1s; }
+        .card.flipped { transform: rotateY(180deg); }
+        .front, .back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        .front { background: #fff; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #666; }
+        .back { transform: rotateY(180deg); }
+        .back img { width: 100%; height: 100%; object-fit: contain; border-radius: 15px; background: white; }
+        .message { font-size: 20px; margin: 20px; color: #d32f2f; }
+        @media (max-width: 600px) { .card { width: 90%; height: auto; } .back img { height: auto; } }
+    </style>
+</head>
+<body>
+    <h1>Symbol Cards by Colin McAllister</h1>
+    <p>Draw your daily guidance or weekly insight – completely free.</p>
+    
+    <div class="buttons">
+        <button id="dailyBtn">Draw Your Daily Card</button>
+        <button id="weeklyBtn">Weekly 3-Card Draw</button>
+        <button id="ownerBtn" style="display:none;">Preview Card (Owner only)</button>
+    </div>
+    
+    <div class="message" id="message"></div>
+    
+    <div class="card-container" id="cards"></div>
+
+    <script>
+        const cardUrls = [
+            "https://i.ibb.co/fdztccmY/symbol-card.jpg",
+            "https://i.ibb.co/xKFC3dnK/symbol-card.jpg",
+            "https://i.ibb.co/wFStd1SV/symbol-card.jpg",
+            "https://i.ibb.co/hR1mZ5M6/symbol-card.jpg",
+            "https://i.ibb.co/QFwqFP5m/symbol-card.jpg",
+            "https://i.ibb.co/XxXYCJgx/symbol-card.jpg",
+            "https://i.ibb.co/mVWw7JJX/symbol-card.jpg",
+            "https://i.ibb.co/cKjR6Mm5/symbol-card.jpg",
+            "https://i.ibb.co/Kcz3RCPp/symbol-card.jpg",
+            "https://i.ibb.co/9mhHs75X/symbol-card.jpg",
+            "https://i.ibb.co/JYnbSpt/symbol-card.jpg",
+            "https://i.ibb.co/F4GR4Zpc/symbol-card.jpg",
+            "https://i.ibb.co/8gRyn8Xh/symbol-card.jpg",
+            "https://i.ibb.co/WNCHS4TV/symbol-card.jpg",
+            "https://i.ibb.co/G3fmTK9B/symbol-card.jpg",
+            "https://i.ibb.co/jkgGd4NV/symbol-card.jpg",
+            "https://i.ibb.co/kRygZ9P/symbol-card.jpg",
+            "https://i.ibb.co/bkF9d0x/symbol-card.jpg"
+        ];
+
+        const totalCards = cardUrls.length;
+
+        const dailyBtn = document.getElementById('dailyBtn');
+        const weeklyBtn = document.getElementById('weeklyBtn');
+        const ownerBtn = document.getElementById('ownerBtn');
+        const message = document.getElementById('message');
+        const cardsDiv = document.getElementById('cards');
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const isOwner = urlParams.get('owner') === '1';
+        if (isOwner) {
+            ownerBtn.style.display = 'inline-block';
+        }
+
+        function getWeekNumber() {
+            const d = new Date();
+            d.setHours(0,0,0,0);
+            d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+            const yearStart = new Date(d.getFullYear(),0,1);
+            return Math.ceil((((d - yearStart) / 86400000) + 1)/7) + '-' + d.getFullYear();
+        }
+
+        function checkDaily() {
+            const today = new Date().toDateString();
+            if (localStorage.getItem('dailyDate') === today) {
+                dailyBtn.disabled = true;
+                message.textContent = 'You have already drawn your daily card today. Come back tomorrow!';
+            } else {
+                dailyBtn.disabled = false;
+            }
+        }
+
+        function checkWeekly() {
+            const week = getWeekNumber();
+            if (localStorage.getItem('weeklyWeek') === week) {
+                weeklyBtn.disabled = true;
+                message.textContent = 'You have already drawn your weekly 3-card draw. Come back next week!';
+            } else {
+                weeklyBtn.disabled = false;
+            }
+        }
+
+        function drawCard() {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'card-wrapper';
+            const card = document.createElement('div');
+            card.className = 'card';
+            const front = document.createElement('div');
+            front.className = 'front';
+            front.textContent = 'Symbol Card';
+            const back = document.createElement('div');
+            back.className = 'back';
+            const img = document.createElement('img');
+            img.src = cardUrls[Math.floor(Math.random() * totalCards)];
+            img.alt = 'Symbol Card';
+            back.appendChild(img);
+            card.appendChild(front);
+            card.appendChild(back);
+            wrapper.appendChild(card);
+            setTimeout(() => card.classList.add('flipped'), 100);
+            return wrapper;
+        }
+
+        dailyBtn.addEventListener('click', () => {
+            cardsDiv.innerHTML = '';
+            message.textContent = 'Your daily card:';
+            cardsDiv.appendChild(drawCard());
+            localStorage.setItem('dailyDate', new Date().toDateString());
+            checkDaily();
+            checkWeekly();
+        });
+
+        weeklyBtn.addEventListener('click', () => {
+            cardsDiv.innerHTML = '';
+            message.textContent = 'Your weekly 3-card draw:';
+            const selected = [];
+            while (selected.length < 3) {
+                const rand = Math.floor(Math.random() * totalCards);
+                if (!selected.includes(rand)) selected.push(rand);
+            }
+            selected.forEach(i => {
+                const wrapper = drawCard();
+                wrapper.querySelector('img').src = cardUrls[i];
+                cardsDiv.appendChild(wrapper);
+            });
+            localStorage.setItem('weeklyWeek', getWeekNumber());
+            checkWeekly();
+            checkDaily();
+        });
+
+        ownerBtn.addEventListener('click', () => {
+            cardsDiv.innerHTML = '';
+            message.textContent = 'Owner preview – no limits:';
+            for (let i = 0; i < 3; i++) {
+                cardsDiv.appendChild(drawCard());
+            }
+        });
+
+        checkDaily();
+        checkWeekly();
+    </script>
+</body>
+</html>
